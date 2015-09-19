@@ -2,8 +2,8 @@
 
 import re
 
-
-def parsefile(filename):
+""" This function return a list of transactions present in the input file """
+def parse_input_file(filename):
     result = []
 
     with open(filename, 'r') as f:
@@ -13,10 +13,27 @@ def parsefile(filename):
             
             if len(m) > 0:
                 row = []
+                print m
                 for item in m:
                     transaction = [int(x.strip()) for x in item.split(',')]
                     row.append(transaction)
 
                 result.append(row)
+
+        return result
+
+
+""" Function to parse parameter file """
+def parse_param_file(filename):
+    result = {}
+
+    with open(filename, 'r') as f:
+        for line in f:
+            data = line.strip()
+            m = re.findall('(?:MIS\((\d+)\)\s+=\s+(.+))', data)
+
+            if len(m) > 0:
+                result[m[0][0]] = m[0][1]
+                print m
 
         return result

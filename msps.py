@@ -4,6 +4,7 @@ import parsefile
 import utilities as util
 from pprint import pprint
 
+
 """ Some constants """
 INPUT_FILE_NAME = 'data.txt'
 PARAM_FILE_NAME = 'para.txt'
@@ -14,13 +15,18 @@ def main():
 
     """ Step 1: Find frequent items """
     frequent_items = step_one(data, mis, sdc)
-    
+
+    """ Step 2: Sort frequent items in ascending order according to their MIS value """
+    frequent_items.sort(key=lambda x: x[1])
+
+    pprint(frequent_items)
 
 
 """ Finds frequent items
-    returns: list of frequent items """
+    returns: list of frequent items (item, mis_val) """
 def step_one(data, mis, sdc):
     frequent_items = list(mis.keys())
+    return_list = []
 
     # check each item to see if it's support is greater than MIS(item)
     total_transactions = float( len(data) )
@@ -29,10 +35,10 @@ def step_one(data, mis, sdc):
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
 
-        if support < mis[item]:
-            frequent_items.remove(item)
+        if support >= mis[item]:
+            return_list.append( (item, mis[item]) )
 
-    return frequent_items
+    return return_list
 
 if __name__ == '__main__':
     main()

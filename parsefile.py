@@ -13,7 +13,7 @@ def parse_input_file(filename):
 
             if len(m) > 0:
                 row = []
-                print m
+
                 for item in m:
                     transaction = [str(x.strip()) for x in item.split(',')]
                     row.append(transaction)

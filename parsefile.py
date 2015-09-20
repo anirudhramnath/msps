@@ -42,5 +42,3 @@ def parse_param_file(filename):
                 result[m[0][0]] = float(m[0][1])
 
         return result, sdc
-
-parse_input_file('data.txt')

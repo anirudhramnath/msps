@@ -30,8 +30,9 @@ def get_projected_database(transactions, sequence, frequent_elements):
         
 
 def get_projected_sequence(transaction, sequence, frequent_elements):
+    remaining_itemset = []
     transaction = copy.deepcopy(transaction)
-    sequence = copy.deepcopy(transaction)
+    sequence = copy.deepcopy(sequence)
     if is_subsequence(transaction, sequence):
         while len(sequence) != 0:
             if len(sequence) != 1:
@@ -43,8 +44,23 @@ def get_projected_sequence(transaction, sequence, frequent_elements):
             else:
                 if is_subset(transaction[0], sequence[0]):
                     (current_transaction, current_sequence) = (transaction[0], sequence[0])
-                    current_transaction.index(current_sequence[-1])
-                    
+                    if len(current_transaction) - 1 > current_transaction.index(current_sequence[-1]):
+                        remaining_itemset = ['_'] + current_transaction[current_transaction.index(current_sequence[-1]) + 1:]
+                    transaction.pop(0)
+                    sequence.pop(0)
+                else:
+                    transaction.pop(0)    
+    if len(remaining_itemset) != 0:
+        transaction = [remaining_itemset]+transaction
+    return transaction
                         
-
+def remove_infrequent_items(sequence, frequent_elements): 
+    return_sequence = []
+    for itemset in sequence:
+        itemset_copy = copy.deepcopy(itemset)
+        for ele in itemset:
+            if ele not in frequent_elements:
+                itemset_copy.remove(ele)
+        return_sequence.append(itemset_copy)
+    return return_sequence
         

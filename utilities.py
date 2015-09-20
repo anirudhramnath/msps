@@ -1,5 +1,9 @@
 import copy
 
+class NotASubsequence(Exception):
+    pass
+
+
 def actual_support(transactions, sequence):
     count = 0
     for transaction in transactions:
@@ -25,8 +29,14 @@ def is_subset(super_set, sub_set):
     return True
 
 def get_projected_database(transactions, sequence, frequent_elements):
+    S = []
     for transaction in transactions:
-        pass
+        try:
+            S.append(get_projected_sequence(transaction, sequence, frequent_elements))
+        except:
+            pass
+
+    return S
 
 
 def get_projected_sequence(transaction, sequence, frequent_elements):
@@ -50,9 +60,16 @@ def get_projected_sequence(transaction, sequence, frequent_elements):
                     sequence.pop(0)
                 else:
                     transaction.pop(0)
+    else:
+        raise NotASubsequence()
+
     if len(remaining_itemset) != 0:
         transaction = [remaining_itemset]+transaction
-    return transaction
+
+    if len(transaction) > 0:
+        return transaction
+    else:
+        raise NotASubsequence()
 
 def remove_infrequent_items(sequence, frequent_elements):
     return_sequence = []

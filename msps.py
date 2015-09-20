@@ -22,7 +22,15 @@ def main():
     # remove MIS values, and just retain item ID
     frequent_items = [x[0] for x in frequent_items]
 
-    print frequent_items
+    """ Step 3: Generate projected database """
+    for item in frequent_items:
+        S_k = util.get_projected_database(data, [[item]], frequent_items)
+
+        if item == '44':
+            print 'ITEM: '+str(item)
+            print 'S:',
+            pprint(S_k)
+            exit()
 
 
 """ Finds frequent items
@@ -43,6 +51,9 @@ def step_one(data, mis, sdc):
 
     return return_list
 
-def r_prefix_span(item, sequence, actual_support)
+def r_prefix_span(item, sequence, actual_support):
+    pass
+
+
 if __name__ == '__main__':
     main()

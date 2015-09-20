@@ -27,7 +27,7 @@ def is_subset(super_set, sub_set):
 def get_projected_database(transactions, sequence, frequent_elements):
     for transaction in transactions:
         pass
-        
+
 
 def get_projected_sequence(transaction, sequence, frequent_elements):
     remaining_itemset = []
@@ -49,12 +49,12 @@ def get_projected_sequence(transaction, sequence, frequent_elements):
                     transaction.pop(0)
                     sequence.pop(0)
                 else:
-                    transaction.pop(0)    
+                    transaction.pop(0)
     if len(remaining_itemset) != 0:
         transaction = [remaining_itemset]+transaction
     return transaction
-                        
-def remove_infrequent_items(sequence, frequent_elements): 
+
+def remove_infrequent_items(sequence, frequent_elements):
     return_sequence = []
     for itemset in sequence:
         itemset_copy = copy.deepcopy(itemset)
@@ -63,4 +63,4 @@ def remove_infrequent_items(sequence, frequent_elements):
                 itemset_copy.remove(ele)
         return_sequence.append(itemset_copy)
     return return_sequence
-        
+

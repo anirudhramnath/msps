@@ -19,7 +19,10 @@ def main():
     """ Step 2: Sort frequent items in ascending order according to their MIS value """
     frequent_items.sort(key=lambda x: x[1])
 
-    pprint(frequent_items)
+    # remove MIS values, and just retain item ID
+    frequent_items = [x[0] for x in frequent_items]
+
+    print frequent_items
 
 
 """ Finds frequent items
@@ -40,5 +43,6 @@ def step_one(data, mis, sdc):
 
     return return_list
 
+def r_prefix_span(item, sequence, actual_support)
 if __name__ == '__main__':
     main()

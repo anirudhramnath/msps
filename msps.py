@@ -14,7 +14,7 @@ def main():
     mis, sdc = parsefile.parse_param_file(PARAM_FILE_NAME)
 
     """ Step 1: Find frequent items """
-    frequent_items = step_one(data, mis, sdc)
+    frequent_items = find_frequent(data, mis, sdc)
 
     """ Step 2: Sort frequent items in ascending order according to their MIS value """
     frequent_items.sort(key=lambda x: x[1])
@@ -22,12 +22,36 @@ def main():
     # remove MIS values, and just retain item ID
     frequent_items = [x[0] for x in frequent_items]
 
-    print frequent_items
+    """ Step 3: Generate projected database """
+    for item in frequent_items:
+        S_k = util.get_projected_database(data, [[item]], frequent_items)
 
+        if '44' == item:
+            subsets = []
+            #pprint(S_k)
+            for transaction in S_k:
+                for itemset in transaction:
+                    if itemset[0] == '_':
+                        for x in itemset[1:]:
+                            if x in frequent_items:
+                                s = [[item, x]]
+                                subsets.append(s)
+                    else:
+                        for x in itemset:
+                            if x in frequent_items:
+                                s = []
+                                s.append([item])
+                                s.append([x])
+                                subsets.append(s)
+            pprint (subsets)
+
+
+def r_prefix_span(item, sequence, data, mis_support):
+    pass
 
 """ Finds frequent items
     returns: list of frequent items (item, mis_val) """
-def step_one(data, mis, sdc):
+def find_frequent(data, mis, sdc):
     frequent_items = list(mis.keys())
     return_list = []
 
@@ -43,6 +67,5 @@ def step_one(data, mis, sdc):
 
     return return_list
 
-def r_prefix_span(item, sequence, actual_support)
 if __name__ == '__main__':
     main()

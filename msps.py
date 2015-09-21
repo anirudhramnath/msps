@@ -26,10 +26,9 @@ def main():
     for item in frequent_items:
         S_k = util.get_projected_database(data, [[item]], frequent_items)
 
-        if '34' == item:
+        if '44' == item:
             subsets = []
-            pprint(S_k)
-            print ''
+
             for transaction in S_k:
                 for itemset in transaction:
                     if itemset[0] == '_':

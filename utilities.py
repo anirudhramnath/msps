@@ -31,6 +31,7 @@ def is_subset(super_set, sub_set):
 def get_projected_database(transactions, sequence, frequent_elements):
     S = []
     for transaction in transactions:
+
         try:
             S.append(get_projected_sequence(transaction, sequence, frequent_elements))
         except:
@@ -80,3 +81,14 @@ def remove_infrequent_items(sequence, frequent_elements):
                 itemset_copy.remove(ele)
         return_sequence.append(itemset_copy)
     return return_sequence
+
+def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items):
+    list_of_x = []
+    for transaction in transaction_database:
+        if transaction[0][0] == '_':
+            for ele in transaction[0][1:]:
+                if ele in frequent_items:
+                    list_of_x.append(ele)
+        while is_subset(transaction, sequence):
+            transaction = get_projected_sequence(transaction, sequence, frequent_items)
+

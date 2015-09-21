@@ -1,9 +1,5 @@
 import copy
 
-class NotASubsequence(Exception):
-    pass
-
-
 def actual_support(transactions, sequence):
     count = 0
     for transaction in transactions:
@@ -29,15 +25,9 @@ def is_subset(super_set, sub_set):
     return True
 
 def get_projected_database(transactions, sequence, frequent_elements):
-    S = []
     for transaction in transactions:
-        try:
-            S.append(get_projected_sequence(transaction, sequence, frequent_elements))
-        except:
-            pass
-
-    return S
-
+        pass
+        
 
 def get_projected_sequence(transaction, sequence, frequent_elements):
     remaining_itemset = []
@@ -59,19 +49,12 @@ def get_projected_sequence(transaction, sequence, frequent_elements):
                     transaction.pop(0)
                     sequence.pop(0)
                 else:
-                    transaction.pop(0)
-    else:
-        raise NotASubsequence()
-
+                    transaction.pop(0)    
     if len(remaining_itemset) != 0:
         transaction = [remaining_itemset]+transaction
-
-    if len(transaction) > 0:
-        return transaction
-    else:
-        raise NotASubsequence()
-
-def remove_infrequent_items(sequence, frequent_elements):
+    return transaction
+                        
+def remove_infrequent_items(sequence, frequent_elements): 
     return_sequence = []
     for itemset in sequence:
         itemset_copy = copy.deepcopy(itemset)
@@ -81,3 +64,14 @@ def remove_infrequent_items(sequence, frequent_elements):
         return_sequence.append(itemset_copy)
     return return_sequence
 
+def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items):
+    list_of_x = []
+    for transaction in transaction_database:
+        if transaction[0][0] == '_':
+            for ele in transaction[0][1:]:
+                if ele in frequent_items:
+                    list_of_x.append(ele)
+        while is_subset(transaction, sequence):
+            transaction = get_projected_sequence(transaction, sequence, frequent_items)
+            
+        

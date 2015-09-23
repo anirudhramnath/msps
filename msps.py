@@ -3,6 +3,7 @@
 import parsefile
 import utilities as util
 from pprint import pprint
+import math
 
 
 """ Some constants """
@@ -12,7 +13,7 @@ PARAM_FILE_NAME = 'para.txt'
 def main():
     data = parsefile.parse_input_file(INPUT_FILE_NAME)
     mis, sdc = parsefile.parse_param_file(PARAM_FILE_NAME)
-
+    
     """ Step 1: Find frequent items """
     frequent_items = find_frequent(data, mis, sdc)
 
@@ -21,8 +22,23 @@ def main():
 
     # remove MIS values, and just retain item ID
     frequent_items = [x[0] for x in frequent_items]
-
-    """ Step 3: Generate projected database """
+    
+    for item in frequent_items:
+        #print(item)
+        item_mis_as_int = math.ceil(mis[item]*len(data))
+        transaction_subset = util.get_S_K_for_item(data, item, sdc, list(mis))
+        #print(item, item_mis_as_int)
+        #pprint(transaction_subset)
+        sequence_generator = util.SequenceGenerator(item, item_mis_as_int, transaction_subset, frequent_items, list(mis))
+        for i,j in sequence_generator.sequence_transaction_list:
+            pass
+            print(i)
+        
+        data = util.remove_item_from_transactions(item, data)
+        #print(data)
+        #print('\n\n')
+        
+    """ Step 3: Generate projected database 
     for item in frequent_items:
         S_k = util.get_projected_database(data, [[item]], frequent_items)
 
@@ -52,7 +68,7 @@ def main():
                                 s.append([x])
                                 subsets.append(s)
             pprint (subsets)
-
+    """
 
 def r_prefix_span(item, sequence, data, mis_support):
     pass
@@ -69,9 +85,10 @@ def find_frequent(data, mis, sdc):
 
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
-
+        
         if support >= mis[item]:
             return_list.append( (item, mis[item]) )
+       
 
     return return_list
 

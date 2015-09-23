@@ -1,5 +1,6 @@
 import copy
-
+from pprint import pprint
+out_file = open('out.txt', 'w')
 class NotASubsequence(Exception):
     pass
 
@@ -82,13 +83,182 @@ def remove_infrequent_items(sequence, frequent_elements):
         return_sequence.append(itemset_copy)
     return return_sequence
 
-def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items):
-    list_of_x = []
-    for transaction in transaction_database:
-        if transaction[0][0] == '_':
-            for ele in transaction[0][1:]:
-                if ele in frequent_items:
-                    list_of_x.append(ele)
-        while is_subset(transaction, sequence):
-            transaction = get_projected_sequence(transaction, sequence, frequent_items)
+def remove_item_from_transaction(transaction, item):
+    new_transaction = []
+    for itemset in transaction:
+        filtered_item_set = [i for i in itemset if i != item]
+        if len(filtered_item_set) > 0:
+            new_transaction.append(filtered_item_set)
+    return new_transaction
 
+def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items):
+    for transaction in transaction_database:
+        for itemset in transaction:
+            if itemset[0] == '_':
+                for x in itemset[1:]:
+                    if x in frequent_items:
+                        subsets.append(x)
+            else:
+                if item in itemset:
+                    i = itemset.index(item)
+                    _item_set = itemset[i+1:]
+                    for x in _item_set:
+                        if x in frequent_items:
+                            subsets.append(x)
+
+def find_candidate_for_ele_x(transaction, sequence, frequent_items):
+    list_of_x = []
+    transaction = copy.deepcopy(transaction)
+    if transaction[0][0] == '_':
+       transaction.pop(0)
+    for itemset in transaction:
+        for ele in itemset:
+            if ele in frequent_items:
+                list_of_x.append(ele)
+    return list(set(list_of_x))
+
+
+def find_candidate_for_ele_with_x1(transaction, sequence, frequent_items):
+    list_of_x = []
+    if transaction[0][0] == '_':
+        for ele in transaction[0][1:]:
+            if ele in frequent_items:
+                list_of_x.append(ele)
+    if is_subsequence(transaction, sequence):
+        transaction = get_projected_sequence(transaction, sequence, frequent_items)
+        list_of_x = list_of_x + find_candidate_for_ele_with_x1(transaction, sequence, frequent_items)
+    return list(set(list_of_x))
+
+def get_S_K_for_item(transactions, item, SDC, item_list):
+    sup = calculate_support_for_elements(item_list, transactions)
+    resulting_transactions = []
+    for transaction in transactions:
+        filtered_transaction = prepare_transaction(transaction, item, SDC, item_list, sup)
+        if filtered_transaction != None:
+            #print(transaction)
+            resulting_transactions.append(filtered_transaction)
+    #print("Resulting transaction for:" + str(item))
+    #pprint(resulting_transactions)
+    return resulting_transactions
+
+def prepare_transaction(transaction, item, SDC, item_list, support_dict):
+    if not is_subsequence(transaction, [[item]]):
+        return None
+    item_list = copy.deepcopy(item_list)
+    item_list.remove(item)
+    for itemj in item_list:
+        if support_dict[itemj] - support_dict[item] > SDC:
+            #print("transaction b4 removal of" + str(itemj))
+            #print(transaction)
+            transaction = remove_item_from_transaction(transaction, itemj)
+            #print("transaction af removal of" + str(itemj))
+            #print(transaction)
+    return transaction
+
+def remove_item_from_transactions(item, transactions):
+    new_transactions = []
+    for transaction in transactions:
+        for itemset in transaction:
+            try:
+                while True:
+                    itemset.remove(item)
+            except ValueError:
+                pass
+            transaction = [i for i in transaction if len(i) > 0]
+        if len(transaction) > 0:
+            new_transactions.append(transaction)
+    return new_transactions
+
+def calculate_support_for_elements(items, transactions):
+    sup = {}
+    for item in items:
+        sup[item] = float(actual_support(transactions, [[item]]))/len(transactions)
+    return sup
+
+class SequenceGenerator:
+    def __init__(self, item, item_mis_as_int, transaction_subset, frequent_items, list_of_items):
+        self.transaction_subset = transaction_subset  
+        self.frequent_sequences = {}
+        self.list_of_items = list_of_items
+        self.item = item
+        self.item_mis_as_int = item_mis_as_int
+        self.sequence_transaction_list = []
+        self.frequent_items = frequent_items
+        self.frequent_items_for_this_subset = self.get_frequent_items()
+        for item, list_of_transactions in self.frequent_items_for_this_subset:
+            self.get_candidate_for_sequence([[item]], list_of_transactions) 
+
+    def get_frequent_items(self):
+        frequent_items_for_this_subset = []
+        for item in self.list_of_items:
+            list_of_transactions = []
+            for transaction in self.transaction_subset:
+                if is_subsequence(transaction, [[item]]):
+                    list_of_transactions.append(copy.deepcopy(transaction))
+            if list(list_of_transactions) >= self.item_mis_as_int:
+                frequent_items_for_this_subset.append((item, list_of_transactions))
+        return frequent_items_for_this_subset
+
+    def get_candidate_for_sequence(self, sequence, transactions):
+        transaction_mapping_for_first_condition = {}
+        transaction_mapping_for_second_condition = {}
+        sequence_transaction_list = []
+        for transaction in transactions:
+            try:
+                
+                projected_sequence = get_projected_sequence(transaction, sequence, self.frequent_items)
+                out_file.write('\n\n')
+                out_file.write(str(sequence))
+                out_file.write('\n')
+                out_file.write(str(transaction))
+                out_file.write('\n')
+                out_file.write(str(projected_sequence))
+                out_file.write('\n')
+                #out_file.write(str(list(set(find_candidate_for_ele_with_x1(projected_sequence, sequence, self.frequent_items)))))
+                #out_file.flush()
+                for candidate_element in list(set(find_candidate_for_ele_with_x1(projected_sequence, sequence, self.frequent_items))):
+                    extended_sequence = copy.deepcopy(sequence)
+                    extended_sequence[-1].append(candidate_element)
+                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items)
+                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
+                        try:
+                            _ = transaction_mapping_for_first_condition[candidate_element]
+                            transaction_mapping_for_first_condition[candidate_element].append(transaction)
+                        except KeyError:
+                            transaction_mapping_for_first_condition[candidate_element] = [transaction]
+                #out_file.write(str(transaction_mapping_for_first_condition))
+
+                out_file.write(str(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items)))))
+                for candidate_element in list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items))):
+                    extended_sequence = copy.deepcopy(sequence)
+                    extended_sequence.append([candidate_element])
+                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items)
+                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
+                        try:
+                            _ = transaction_mapping_for_second_condition[candidate_element]
+                            transaction_mapping_for_second_condition[candidate_element].append(transaction)
+                        except KeyError:
+                            transaction_mapping_for_second_condition[candidate_element] = [transaction]
+                    
+                out_file.write(str(transaction_mapping_for_second_condition))
+                
+            except NotASubsequence:
+                pass
+        out_file.flush()
+                
+        for element in transaction_mapping_for_first_condition:
+            extended_sequence = copy.deepcopy(sequence)
+            extended_sequence[-1].append(element)
+            if len(transaction_mapping_for_first_condition[element]) >= self.item_mis_as_int:
+                
+                sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
+                self.sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
+        for element in transaction_mapping_for_second_condition:
+            extended_sequence = copy.deepcopy(sequence)
+            extended_sequence.append([element])
+            if len(transaction_mapping_for_second_condition[element]) >= self.item_mis_as_int:
+                sequence_transaction_list.append((extended_sequence, transaction_mapping_for_second_condition[element]))
+                self.sequence_transaction_list.append((extended_sequence, transaction_mapping_for_second_condition[element]))
+            #out_file.write(str(self.sequence_transaction_list))
+        for (generated_sequence, transaction_list) in sequence_transaction_list:
+            self.get_candidate_for_sequence(generated_sequence, transaction_list)

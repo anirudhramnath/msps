@@ -27,8 +27,9 @@ def main():
         #print(item)
         item_mis_as_int = math.ceil(mis[item]*len(data))
         transaction_subset = util.get_S_K_for_item(data, item, sdc, list(mis))
-        #print(item, item_mis_as_int)
-        #pprint(transaction_subset)
+        if item == '2':
+            print(item, item_mis_as_int)
+            pprint(transaction_subset)
         sequence_generator = util.SequenceGenerator(item, item_mis_as_int, transaction_subset, frequent_items, list(mis))
         for i,j in sequence_generator.sequence_transaction_list:
             pass

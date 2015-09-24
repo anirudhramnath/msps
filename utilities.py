@@ -185,6 +185,9 @@ class SequenceGenerator:
         self.sequence_transaction_list = []
         self.frequent_items = frequent_items
         self.frequent_items_for_this_subset = self.get_frequent_items()
+        self.frequent_items_list_for_this_subset = [i[0] for i in self.frequent_items_for_this_subset]
+        #if self.item == '2':
+            #print(self.frequent_items_for_this_subset)
         for item, list_of_transactions in self.frequent_items_for_this_subset:
             self.get_candidate_for_sequence([[item]], list_of_transactions) 
 
@@ -195,7 +198,7 @@ class SequenceGenerator:
             for transaction in self.transaction_subset:
                 if is_subsequence(transaction, [[item]]):
                     list_of_transactions.append(copy.deepcopy(transaction))
-            if list(list_of_transactions) >= self.item_mis_as_int:
+            if len(list_of_transactions) >= self.item_mis_as_int:
                 frequent_items_for_this_subset.append((item, list_of_transactions))
         return frequent_items_for_this_subset
 
@@ -206,7 +209,7 @@ class SequenceGenerator:
         for transaction in transactions:
             try:
                 
-                projected_sequence = get_projected_sequence(transaction, sequence, self.frequent_items)
+                projected_sequence = get_projected_sequence(transaction, sequence, self.frequent_items_list_for_this_subset)
                 out_file.write('\n\n')
                 out_file.write(str(sequence))
                 out_file.write('\n')
@@ -214,12 +217,16 @@ class SequenceGenerator:
                 out_file.write('\n')
                 out_file.write(str(projected_sequence))
                 out_file.write('\n')
-                #out_file.write(str(list(set(find_candidate_for_ele_with_x1(projected_sequence, sequence, self.frequent_items)))))
+                if self.item == '2':
+                    print('\n\n')
+                    print(transaction)
+                    print(str(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items)))))
+                    pass
                 #out_file.flush()
-                for candidate_element in list(set(find_candidate_for_ele_with_x1(projected_sequence, sequence, self.frequent_items))):
+                for candidate_element in list(set(find_candidate_for_ele_with_x1(projected_sequence, sequence, self.frequent_items_list_for_this_subset))):
                     extended_sequence = copy.deepcopy(sequence)
                     extended_sequence[-1].append(candidate_element)
-                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items)
+                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items_list_for_this_subset)
                     if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
                         try:
                             _ = transaction_mapping_for_first_condition[candidate_element]
@@ -229,10 +236,10 @@ class SequenceGenerator:
                 #out_file.write(str(transaction_mapping_for_first_condition))
 
                 out_file.write(str(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items)))))
-                for candidate_element in list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items))):
+                for candidate_element in list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items_list_for_this_subset))):
                     extended_sequence = copy.deepcopy(sequence)
                     extended_sequence.append([candidate_element])
-                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items)
+                    projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items_list_for_this_subset)
                     if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
                         try:
                             _ = transaction_mapping_for_second_condition[candidate_element]

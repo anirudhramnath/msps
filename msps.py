@@ -13,7 +13,7 @@ PARAM_FILE_NAME = 'para.txt'
 def main():
     data = parsefile.parse_input_file(INPUT_FILE_NAME)
     mis, sdc = parsefile.parse_param_file(PARAM_FILE_NAME)
-    
+
     """ Step 1: Find frequent items """
     frequent_items = find_frequent(data, mis, sdc)
 
@@ -22,7 +22,7 @@ def main():
 
     # remove MIS values, and just retain item ID
     frequent_items = [x[0] for x in frequent_items]
-    
+
     for item in frequent_items:
         #print(item)
         item_mis_as_int = math.ceil(mis[item]*len(data))
@@ -35,12 +35,12 @@ def main():
         for i,j in sequence_generator.sequence_transaction_list:
             pass
             print(i)
-        
+
         data = util.remove_item_from_transactions(item, data)
         #print(data)
         #print('\n\n')
-        
-    """ Step 3: Generate projected database 
+
+    """ Step 3: Generate projected database
     for item in frequent_items:
         S_k = util.get_projected_database(data, [[item]], frequent_items)
 
@@ -87,10 +87,10 @@ def find_frequent(data, mis, sdc):
 
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
-        
+
         if support >= mis[item]:
             return_list.append( (item, mis[item]) )
-       
+
 
     return return_list
 

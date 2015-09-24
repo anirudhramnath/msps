@@ -189,7 +189,7 @@ def calculate_support_for_elements(items, transactions):
 
 class SequenceGenerator:
     def __init__(self, item, item_mis_as_int, transaction_subset, frequent_items, list_of_items):
-        self.transaction_subset = transaction_subset  
+        self.transaction_subset = transaction_subset
         self.frequent_sequences = {}
         self.list_of_items = list_of_items
         self.item = item
@@ -201,7 +201,7 @@ class SequenceGenerator:
         #if self.item == '2':
             #print(self.frequent_items_for_this_subset)
         for item, list_of_transactions in self.frequent_items_for_this_subset:
-            self.get_candidate_for_sequence([[item]], list_of_transactions) 
+            self.get_candidate_for_sequence([[item]], list_of_transactions)
 
     def get_frequent_items(self):
         frequent_items_for_this_subset = []
@@ -220,7 +220,7 @@ class SequenceGenerator:
         sequence_transaction_list = []
         for transaction in transactions:
             try:
-                
+
                 projected_sequence = get_projected_sequence(transaction, sequence, self.frequent_items_list_for_this_subset)
                 out_file.write('\n\n')
                 out_file.write(str(sequence))
@@ -248,7 +248,7 @@ class SequenceGenerator:
                 #out_file.write(str(transaction_mapping_for_first_condition))
 
                 #out_file.write(str(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items)))))
-                
+
                 # if sequence[0][0] == '2':
                 #     print(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items_list_for_this_subset)))),
                 #     print "candidates"
@@ -274,24 +274,24 @@ class SequenceGenerator:
                     #print(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items_list_for_this_subset)))),
                     #print "candidates"
                     if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
-                        
+
                         try:
                             _ = transaction_mapping_for_second_condition[candidate_element]
                             transaction_mapping_for_second_condition[candidate_element].append(transaction)
                         except KeyError:
                             transaction_mapping_for_second_condition[candidate_element] = [transaction]
-                    
+
                 out_file.write(str(transaction_mapping_for_second_condition))
-                
+
             except NotASubsequence:
                 pass
         out_file.flush()
-                
+
         for element in transaction_mapping_for_first_condition:
             extended_sequence = copy.deepcopy(sequence)
             extended_sequence[-1].append(element)
             if len(transaction_mapping_for_first_condition[element]) >= self.item_mis_as_int:
-                
+
                 sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
                 self.sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
         for element in transaction_mapping_for_second_condition:

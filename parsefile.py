@@ -36,7 +36,7 @@ def parse_param_file(filename):
                 sdc = float(line.split('=')[1].strip());
 
             data = line.strip()
-            m = re.findall('(?:MIS\((\d+)\)\s+=\s+(.+))', data)
+            m = re.findall('(?:MIS\((\d+)\)\s*=\s*(.+))', data)
 
             if len(m) > 0:
                 result[m[0][0]] = float(m[0][1])

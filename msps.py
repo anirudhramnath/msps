@@ -10,6 +10,8 @@ import math
 INPUT_FILE_NAME = 'data.txt'
 PARAM_FILE_NAME = 'para.txt'
 
+final_output = {}
+
 def main():
     data = parsefile.parse_input_file(INPUT_FILE_NAME)
     mis, sdc = parsefile.parse_param_file(PARAM_FILE_NAME)
@@ -23,57 +25,34 @@ def main():
     # remove MIS values, and just retain item ID
     frequent_items = [x[0] for x in frequent_items]
 
+    # add level 1 items
+    final_output[1] = []
+    for item in frequent_items:
+        final_output[1].append(([[item]], util.actual_support(data, [[item]])))
+
     for item in frequent_items:
         #print(item)
         item_mis_as_int = math.ceil(mis[item]*len(data))
         transaction_subset = util.get_S_K_for_item(data, item, sdc, list(mis))
-        if item == '2':
-            pass
-            #print(item, item_mis_as_int)
-            #pprint(transaction_subset)
+
         sequence_generator = util.SequenceGenerator(item, item_mis_as_int, transaction_subset, frequent_items, list(mis))
         for i,j in sequence_generator.sequence_transaction_list:
-            pass
-            print(i)
+            temp = [item for sublist in i for item in sublist]
+
+            if len(temp) not in final_output:
+                final_output[len(temp)] = [(i, len(j))]
+            else:
+                final_output[len(temp)].append((i, len(j)))
+
+            #print(i), len(j)
 
         data = util.remove_item_from_transactions(item, data)
-        #print(data)
-        #print('\n\n')
 
-    """ Step 3: Generate projected database
-    for item in frequent_items:
-        S_k = util.get_projected_database(data, [[item]], frequent_items)
 
-        if '44' == item:
-            subsets = []
-
-            for transaction in S_k:
-                for itemset in transaction:
-                    if itemset[0] == '_':
-                        for x in itemset[1:]:
-                            if x in frequent_items:
-                                s = [[item, x]]
-                                subsets.append(s)
-                    else:
-                        if item in itemset:
-                            i = itemset.index(item)
-                            _item_set = itemset[i+1:]
-                            for x in _item_set:
-                                if x in frequent_items:
-                                    s = [[item, x]]
-                                    subsets.append(s)
-
-                        for x in itemset:
-                            if x in frequent_items:
-                                s = []
-                                s.append([item])
-                                s.append([x])
-                                subsets.append(s)
-            pprint (subsets)
-    """
-
-def r_prefix_span(item, sequence, data, mis_support):
-    pass
+    for k in sorted(final_output.keys()):
+        print '\nThe number of length '+str(k)+' sequential patterns is '+ str(len(final_output[k]))
+        for patterns in final_output[k]:
+            print 'Pattern: '+pprint_result(str(patterns[0]))+' Count: '+str(patterns[1])
 
 """ Finds frequent items
     returns: list of frequent items (item, mis_val) """
@@ -87,12 +66,21 @@ def find_frequent(data, mis, sdc):
 
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
-
+        print 'Support of item ' + str(item) + ' is :' + str(support)
         if support >= mis[item]:
             return_list.append( (item, mis[item]) )
 
 
     return return_list
+
+def pprint_result(pattern_str):
+    pattern_str = pattern_str[1:-1]
+
+    pattern_str = '{'.join(pattern_str.split('['))
+    pattern_str = '}'.join(pattern_str.split(']'))
+
+    result = '<' + pattern_str.replace("'", "") + '>'
+    return result
 
 if __name__ == '__main__':
     main()

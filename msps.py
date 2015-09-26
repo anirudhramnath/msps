@@ -49,10 +49,11 @@ def main():
         data = util.remove_item_from_transactions(item, data)
 
 
-    for k in sorted(final_output.keys()):
-        print '\nThe number of length '+str(k)+' sequential patterns is '+ str(len(final_output[k]))
-        for patterns in final_output[k]:
-            print 'Pattern: '+pprint_result(str(patterns[0]))+' Count: '+str(patterns[1])
+    with open('output.txt', 'w') as output_file:
+        for k in sorted(final_output.keys()):
+            output_file.write('\nThe number of length '+str(k)+' sequential patterns is '+ str(len(final_output[k])) + '\n\n')
+            for patterns in final_output[k]:
+                output_file.write('Pattern: '+pprint_result(str(patterns[0]))+' Count: '+str(patterns[1])+'\n')
 
 """ Finds frequent items
     returns: list of frequent items (item, mis_val) """

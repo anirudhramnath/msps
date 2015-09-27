@@ -7,14 +7,15 @@ import math
 
 
 """ Some constants """
-INPUT_FILE_NAME = 'data.txt'
-PARAM_FILE_NAME = 'para.txt'
+INPUT_FILE_NAME = 'data2.txt'
+PARAM_FILE_NAME = 'para2.txt'
 
 final_output = {}
 
 def main():
     data = parsefile.parse_input_file(INPUT_FILE_NAME)
     mis, sdc = parsefile.parse_param_file(PARAM_FILE_NAME)
+    support_dict_for_elements = util.calculate_support_for_elements(list(mis), data)
 
     """ Step 1: Find frequent items """
     frequent_items = find_frequent(data, mis, sdc)
@@ -35,7 +36,7 @@ def main():
         item_mis_as_int = math.ceil(mis[item]*len(data))
         transaction_subset = util.get_S_K_for_item(data, item, sdc, list(mis))
 
-        sequence_generator = util.SequenceGenerator(item, item_mis_as_int, transaction_subset, frequent_items, list(mis))
+        sequence_generator = util.SequenceGenerator(item, item_mis_as_int, transaction_subset, frequent_items, list(mis),  support_dict_for_elements, sdc)
         for i,j in sequence_generator.sequence_transaction_list:
             temp = [item for sublist in i for item in sublist]
 

@@ -188,7 +188,7 @@ def calculate_support_for_elements(items, transactions):
     return sup
 
 class SequenceGenerator:
-    def __init__(self, item, item_mis_as_int, transaction_subset, frequent_items, list_of_items):
+    def __init__(self, item, item_mis_as_int, transaction_subset, frequent_items, list_of_items, support_for_items, sdc):
         self.transaction_subset = transaction_subset
         self.frequent_sequences = {}
         self.list_of_items = list_of_items
@@ -198,10 +198,12 @@ class SequenceGenerator:
         self.frequent_items = frequent_items
         self.frequent_items_for_this_subset = self.get_frequent_items()
         self.frequent_items_list_for_this_subset = [i[0] for i in self.frequent_items_for_this_subset]
+        self.support_for_items = support_for_items
+        self.sdc = sdc
         #if self.item == '2':
             #print(self.frequent_items_for_this_subset)
         for item, list_of_transactions in self.frequent_items_for_this_subset:
-            self.get_candidate_for_sequence([[item]], list_of_transactions)
+            self.get_candidate_for_sequence([[item]], self.support_for_items[item], self.support_for_items[item], list_of_transactions)
 
     def get_frequent_items(self):
         frequent_items_for_this_subset = []
@@ -214,9 +216,11 @@ class SequenceGenerator:
                 frequent_items_for_this_subset.append((item, list_of_transactions))
         return frequent_items_for_this_subset
 
-    def get_candidate_for_sequence(self, sequence, transactions):
+    def get_candidate_for_sequence(self, sequence, sequence_min, sequence_max, transactions):
         transaction_mapping_for_first_condition = {}
         transaction_mapping_for_second_condition = {}
+        element_min_max_for_first_condition = {}
+        element_min_max_for_second_condition = {}
         sequence_transaction_list = []
         for transaction in transactions:
             try:
@@ -239,7 +243,20 @@ class SequenceGenerator:
                     extended_sequence = copy.deepcopy(sequence)
                     extended_sequence[-1].append(candidate_element)
                     projected_sequence = get_projected_sequence(transaction, extended_sequence, self.frequent_items_list_for_this_subset)
-                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
+                    temp_sequence_min = sequence_min
+                    temp_sequence_max = sequence_max
+                    
+
+                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):        
+                        if not(self.support_for_items[candidate_element] >= sequence_min and self.support_for_items[candidate_element] <= sequence_max):
+                            if self.support_for_items[candidate_element] <= sequence_min:
+                                temp_sequence_min = self.support_for_items[candidate_element]
+                            if self.support_for_items[candidate_element] >= sequence_max:
+                                temp_sequence_max = self.support_for_items[candidate_element]
+
+                        if temp_sequence_max - temp_sequence_min <= self.sdc:
+                            element_min_max_for_first_condition[candidate_element] = (temp_sequence_min, temp_sequence_max)
+
                         try:
                             _ = transaction_mapping_for_first_condition[candidate_element]
                             transaction_mapping_for_first_condition[candidate_element].append(transaction)
@@ -273,8 +290,19 @@ class SequenceGenerator:
                     # print "item"
                     #print(list(set(find_candidate_for_ele_x(projected_sequence, sequence, self.frequent_items_list_for_this_subset)))),
                     #print "candidates"
-                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
+                    temp_sequence_min = sequence_min
+                    temp_sequence_max = sequence_max
 
+                    
+                    if is_subsequence(extended_sequence, [[self.item]]) or is_subsequence(projected_sequence, [[self.item]]):
+                        if not(self.support_for_items[candidate_element] >= sequence_min and self.support_for_items[candidate_element] <= sequence_max):
+                            if self.support_for_items[candidate_element] <= sequence_min:
+                                temp_sequence_min = self.support_for_items[candidate_element]
+                            if self.support_for_items[candidate_element] >= sequence_max:
+                                temp_sequence_max = self.support_for_items[candidate_element]
+                        temp_sdc = temp_sequence_max - temp_sequence_min 
+                        if temp_sequence_max - temp_sequence_min <= self.sdc:
+                            element_min_max_for_second_condition[candidate_element] = (temp_sequence_min, temp_sequence_max)
                         try:
                             _ = transaction_mapping_for_second_condition[candidate_element]
                             transaction_mapping_for_second_condition[candidate_element].append(transaction)
@@ -287,19 +315,21 @@ class SequenceGenerator:
                 pass
         out_file.flush()
 
-        for element in transaction_mapping_for_first_condition:
+        for element in element_min_max_for_first_condition:
             extended_sequence = copy.deepcopy(sequence)
             extended_sequence[-1].append(element)
             if len(transaction_mapping_for_first_condition[element]) >= self.item_mis_as_int:
-
-                sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
+                #sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
+                self.get_candidate_for_sequence(extended_sequence, element_min_max_for_first_condition[element][0], element_min_max_for_first_condition[element][1], transaction_mapping_for_first_condition[element])
                 self.sequence_transaction_list.append((extended_sequence, transaction_mapping_for_first_condition[element]))
-        for element in transaction_mapping_for_second_condition:
+        for element in element_min_max_for_second_condition:
             extended_sequence = copy.deepcopy(sequence)
             extended_sequence.append([element])
             if len(transaction_mapping_for_second_condition[element]) >= self.item_mis_as_int:
-                sequence_transaction_list.append((extended_sequence, transaction_mapping_for_second_condition[element]))
+                #sequence_transaction_list.append((extended_sequence, transaction_mapping_for_second_condition[element]))
+                self.get_candidate_for_sequence(extended_sequence, element_min_max_for_second_condition[element][0], element_min_max_for_second_condition[element][1], transaction_mapping_for_second_condition[element])
                 self.sequence_transaction_list.append((extended_sequence, transaction_mapping_for_second_condition[element]))
             #out_file.write(str(self.sequence_transaction_list))
-        for (generated_sequence, transaction_list) in sequence_transaction_list:
-            self.get_candidate_for_sequence(generated_sequence, transaction_list)
+#        for (generated_sequence, transaction_list) in sequence_transaction_list:
+#            pass
+            #self.get_candidate_for_sequence(generated_sequence, transaction_list)

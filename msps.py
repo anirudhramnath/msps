@@ -2,13 +2,14 @@
 
 import parsefile
 import utilities as util
-from pprint import pprint
 import math
+import sys
 
 
 """ Some constants """
-INPUT_FILE_NAME = 'data2.txt'
-PARAM_FILE_NAME = 'para2.txt'
+INPUT_FILE_NAME = ''
+PARAM_FILE_NAME = ''
+OUTPUT_FILE_NAME = ''
 
 final_output = {}
 
@@ -32,7 +33,6 @@ def main():
         final_output[1].append(([[item]], util.actual_support(data, [[item]])))
 
     for item in frequent_items:
-        #print(item)
         item_mis_as_int = math.ceil(mis[item]*len(data))
         transaction_subset = util.get_S_K_for_item(data, item, sdc, list(mis))
 
@@ -45,12 +45,10 @@ def main():
             else:
                 final_output[len(temp)].append((i, len(j)))
 
-            #print(i), len(j)
-
         data = util.remove_item_from_transactions(item, data)
 
 
-    with open('output.txt', 'w') as output_file:
+    with open(OUTPUT_FILE_NAME, 'w') as output_file:
         for k in sorted(final_output.keys()):
             output_file.write('\nThe number of length '+str(k)+' sequential patterns is '+ str(len(final_output[k])) + '\n\n')
             for patterns in final_output[k]:
@@ -68,7 +66,7 @@ def find_frequent(data, mis, sdc):
 
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
-        print 'Support of item ' + str(item) + ' is :' + str(support)
+
         if support >= mis[item]:
             return_list.append( (item, mis[item]) )
 
@@ -85,4 +83,12 @@ def pprint_result(pattern_str):
     return result
 
 if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        print "Usage: python msps.py <data_file> <para_file> <output_file>"
+        sys.exit()
+
+    INPUT_FILE_NAME = sys.argv[1]
+    PARAM_FILE_NAME = sys.argv[2]
+    OUTPUT_FILE_NAME = sys.argv[3]
+
     main()

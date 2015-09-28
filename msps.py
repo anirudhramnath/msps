@@ -66,7 +66,6 @@ def find_frequent(data, mis, sdc):
 
     for item in frequent_items:
         support = float(util.actual_support(data, [[item]])) / total_transactions
-
         if support >= mis[item]:
             return_list.append( (item, mis[item]) )
 

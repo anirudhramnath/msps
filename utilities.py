@@ -7,6 +7,9 @@ class NotASubsequence(Exception):
 
 
 def actual_support(transactions, sequence):
+    """
+    Calculates the actual support for a sequence within the set of transactions
+    """
     count = 0
     for transaction in transactions:
         if is_subsequence(transaction, sequence):
@@ -14,6 +17,9 @@ def actual_support(transactions, sequence):
     return count
 
 def is_subsequence(transaction, sequence):
+    """
+    Reutrns if the sequence is a subsequence of the transaction
+    """
     transaction = copy.deepcopy(transaction)
     sequence = copy.deepcopy(sequence)
     while len(sequence) != 0 and len(transaction) != 0:
@@ -31,6 +37,10 @@ def is_subset(super_set, sub_set):
     return True
 
 def get_projected_database(transactions, sequence, frequent_elements):
+    """
+    Generates the projected database for the sequence with all the transactions in the transaction set 
+    with infrequent elements removed.
+    """
     S = []
     for transaction in transactions:
 
@@ -43,6 +53,9 @@ def get_projected_database(transactions, sequence, frequent_elements):
 
 
 def get_projected_sequence(transaction, sequence, frequent_elements):
+    """
+    Generates the  projected database for the sequence under the given transaction
+    """
     remaining_itemset = []
     transaction = copy.deepcopy(transaction)
     sequence = copy.deepcopy(sequence)
@@ -76,6 +89,9 @@ def get_projected_sequence(transaction, sequence, frequent_elements):
         return [['_']]
 
 def remove_infrequent_items(sequence, frequent_elements):
+    """
+    removes the infrequent items from the sequence
+    """
     return_sequence = []
     for itemset in sequence:
         itemset_copy = copy.deepcopy(itemset)
@@ -86,6 +102,9 @@ def remove_infrequent_items(sequence, frequent_elements):
     return return_sequence
 
 def remove_item_from_transaction(transaction, item):
+    """
+    Removes the specified item from the transaction
+    """
     new_transaction = []
     for itemset in transaction:
         filtered_item_set = [i for i in itemset if i != item]
@@ -94,6 +113,9 @@ def remove_item_from_transaction(transaction, item):
     return new_transaction
 
 def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items):
+    """
+    Returns the list of elements (x) which can take the form {sequence, x} in the transaction
+    """
     for transaction in transaction_database:
         for itemset in transaction:
             if itemset[0] == '_':
@@ -109,6 +131,9 @@ def find_candidate_for_ele_with_x(transaction_database, sequence, frequent_items
                             subsets.append(x)
 
 def find_candidate_for_ele_x(transaction, sequence, frequent_items):
+    """
+    Returns the list of elements (x) which can take the form {sequence},{x} in the transaction
+    """
     list_of_x = []
     transaction = copy.deepcopy(transaction)
     if transaction[0][0] == '_':
@@ -121,6 +146,9 @@ def find_candidate_for_ele_x(transaction, sequence, frequent_items):
 
 
 def find_candidate_for_ele_with_x1(transaction, sequence, frequent_items):
+    """
+    Returns the list of elements (x) which can take the form {sequence, x} in the transaction
+    """
     list_of_x = []
     if transaction[0][0] == '_':
         for ele in transaction[0][1:]:
@@ -132,6 +160,10 @@ def find_candidate_for_ele_with_x1(transaction, sequence, frequent_items):
     return list(set(list_of_x))
 
 def get_S_K_for_item(transactions, item, SDC, item_list):
+    """
+    Returns the transaction subset by removing transactions that doesnt contain item 
+    It also removes the items that doesnt satisfy sdc with respect to item
+    """
     sup = calculate_support_for_elements(item_list, transactions)
     resulting_transactions = []
     for transaction in transactions:
@@ -141,6 +173,10 @@ def get_S_K_for_item(transactions, item, SDC, item_list):
     return resulting_transactions
 
 def prepare_transaction(transaction, item, SDC, item_list, support_dict):
+    """
+    Checks if the transaction contains item
+    Returns the transaction after removing the items that doesnt satisfy the sdc with respect to item
+    """
     if not is_subsequence(transaction, [[item]]):
         return None
     item_list = copy.deepcopy(item_list)
@@ -151,6 +187,9 @@ def prepare_transaction(transaction, item, SDC, item_list, support_dict):
     return transaction
 
 def remove_item_from_transactions(item, transactions):
+    """
+    Removes the specified item from the transaction
+    """
     new_transactions = []
     for transaction in transactions:
         for itemset in transaction:
@@ -165,12 +204,18 @@ def remove_item_from_transactions(item, transactions):
     return new_transactions
 
 def calculate_support_for_elements(items, transactions):
+    """
+    Calculates the support for the specified Item in the transaction set
+    """
     sup = {}
     for item in items:
         sup[item] = float(actual_support(transactions, [[item]]))/len(transactions)
     return sup
 
 class SequenceGenerator:
+    """
+    This class holds the details needed for running a single recurssion of r-prefxscan
+    """
     def __init__(self, item, item_mis_as_int, transaction_subset, frequent_items, list_of_items, support_for_items, sdc):
         self.transaction_subset = transaction_subset
         self.frequent_sequences = {}
